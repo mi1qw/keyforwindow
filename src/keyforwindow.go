@@ -49,6 +49,21 @@ func main() {
 	defer hook.End()
 
 	window := api.NewBuilder().SetWindow("jetbrains-idea")
+
+	// center left right
+	window.RegisterMouse1(hook.MouseUp, hook.MouseMap["right"], // указательный
+		api.WindEvent{
+			"jetbrains-idea": func(event hook.Event) {
+				if api.CheckBtn() {
+					robotgo.KeyTap("f8")
+					fmt.Println(event, "f8")
+				}
+			},
+			"microsoft-edge": func(event hook.Event) {
+				robotgo.KeyTap("w", "ctrl")
+				fmt.Println(event, "w")
+			}})
+
 	window.Register(hook.KeyDown, []string{"q"},
 		func(event hook.Event) {
 			fmt.Println("q!!!!!!!!!!!")
@@ -64,13 +79,13 @@ func main() {
 	//	})
 
 	// center left right
-	window.RegisterMouse(hook.MouseUp, hook.MouseMap["right"], // указательный
-		func(event hook.Event) {
-			if api.CheckBtn() {
-				robotgo.KeyTap("f8")
-				fmt.Println(event)
-			}
-		})
+	//window.RegisterMouse(hook.MouseUp, hook.MouseMap["right"], // указательный
+	//	func(event hook.Event) {
+	//		if api.CheckBtn() {
+	//			robotgo.KeyTap("f8")
+	//			fmt.Println(event)
+	//		}
+	//	})
 
 	window.Register(hook.KeyDown, []string{"ctrl", "8"}, // нижняя указательный
 		func(event hook.Event) {
@@ -111,7 +126,7 @@ func main() {
 
 	//for n := 1; ; n++ {
 	//
-	//	println(api.WinClass([]byte("jetbrains-idea")))
+	//	println(api.IsWinClass([]byte("jetbrains-idea")))
 	//	time.Sleep(1050 * time.Millisecond)
 	//	//println(n, win.Id, name, robotgo.GetPid())
 	//	win := api.GetWin()

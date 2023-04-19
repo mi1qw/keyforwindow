@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/go-vgo/robotgo"
+	hook "github.com/robotn/gohook"
 	"github.com/robotn/xgb/xproto"
 	"github.com/robotn/xgbutil"
 	"github.com/robotn/xgbutil/ewmh"
@@ -35,8 +36,8 @@ func GetWin() *xwindow.Window {
 	return win
 }
 
-// WinClass Получить имя класса текущего активного окна.
-func WinClass(name []byte) bool {
+// IsWinClass Получить имя класса текущего активного окна.
+func IsWinClass(name []byte) bool {
 	win := GetWin()
 	nameProp, err := xprop.GetProperty(X, win.Id, "WM_CLASS")
 	if err != nil {
@@ -46,6 +47,19 @@ func WinClass(name []byte) bool {
 	class := nameProp.Value
 	//fmt.Printf("Window process name: %s\n", class)
 	return bytes.HasPrefix(class, name)
+}
+
+func (b *Builder) findFuncByWind1() func(event hook.Event) {
+	win := GetWin()
+	nameProp, err := xprop.GetProperty(X, win.Id, "WM_CLASS")
+	if err != nil {
+		//log.Fatalf("Could not get process name: %s", err)
+		return nil
+	}
+	class := nameProp.Value
+	class = class[:len(class)/2-1]
+	//fmt.Printf("Window process name: %s\n", class)
+	return b.make[string(class)]
 }
 
 type RGBA struct {
