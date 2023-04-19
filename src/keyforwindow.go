@@ -55,8 +55,7 @@ func main() {
 		api.WindEvent{
 			"jetbrains-idea": func(event hook.Event) {
 				if api.CheckBtn() {
-					robotgo.KeyTap("f8")
-					fmt.Println(event, "f8")
+					robotgo.KeyTap("f7")
 				}
 			},
 			"microsoft-edge": func(event hook.Event) {
@@ -64,10 +63,11 @@ func main() {
 				fmt.Println(event, "w")
 			}})
 
-	window.Register(hook.KeyDown, []string{"q"},
-		func(event hook.Event) {
-			fmt.Println("q!!!!!!!!!!!")
-		})
+	//window.Register(hook.KeyDown, []string{"q"},
+	//	func(event hook.Event) {
+	//		fmt.Println("q!!!!!!!!!!!")
+	//	})
+
 	// window.Register(hook.KeyDown, []string{"esc"},
 	// 	func(event hook.Event) {
 	// 		hook.End()
@@ -90,7 +90,8 @@ func main() {
 	window.Register(hook.KeyDown, []string{"ctrl", "8"}, // нижняя указательный
 		func(event hook.Event) {
 			if api.CheckBtn() {
-				robotgo.KeyTap("f7")
+				robotgo.KeyTap("f8")
+				fmt.Println(event, "f8")
 			}
 		})
 	//window.Register(hook.KeyDown, []string{"l", "ctrl", "alt"}, // нижняя указательный
@@ -115,12 +116,12 @@ func main() {
 	//	})
 
 	//WM_CLASS(STRING) = "microsoft-edge", "Microsoft-edge"
-	browser := api.NewBuilder().SetWindow("microsoft-edge")
-	browser.RegisterMouse(hook.MouseUp, hook.MouseMap["right"], // указательный
-		func(event hook.Event) {
-			robotgo.KeyTap("w", "ctrl")
-			//fmt.Println(event)
-		})
+	//browser := api.NewBuilder().SetWindow("microsoft-edge")
+	//browser.RegisterMouse(hook.MouseUp, hook.MouseMap["right"], // указательный
+	//	func(event hook.Event) {
+	//		robotgo.KeyTap("w", "ctrl")
+	//		//fmt.Println(event)
+	//	})
 
 	<-hook.Process(s)
 

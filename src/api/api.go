@@ -65,11 +65,14 @@ func (b *Builder) RegisterMouse1(when uint8, comand uint16,
 	w WindEvent) *Builder {
 	b.make = w
 	cb := func(event hook.Event) {
-		wind1 := b.findFuncByWind1()
-		if wind1 != nil && event.Button == comand {
-			wind1(event)
+		if event.Button == comand {
+			wind1 := b.findFuncByWind1()
+			if wind1 != nil {
+				wind1(event)
+			}
 		}
 	}
+
 	hook.Register(when, []string{}, cb)
 	return b
 }
