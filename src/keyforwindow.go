@@ -51,17 +51,55 @@ func main() {
 	window := api.NewBuilder().SetWindow("jetbrains-idea")
 
 	// center left right
-	window.RegisterMouse1(hook.MouseUp, hook.MouseMap["right"], // указательный
+	window.Register1(hook.KeyDown, []string{"f1", "ctrl"}, // указательный
 		api.WindEvent{
 			"jetbrains-idea": func(event hook.Event) {
-				if api.CheckBtn() {
-					robotgo.KeyTap("f7")
+				if api.CheckBtn(window) {
+					robotgo.KeyTap("f9")
+					//log.Println("f9")
+				} else {
+					robotgo.KeyTap("f4", "ctrl")
+					//log.Println("f4")
 				}
 			},
 			"microsoft-edge": func(event hook.Event) {
 				robotgo.KeyTap("w", "ctrl")
-				fmt.Println(event, "w")
+				//log.Println("microsoft-edge", "right")
 			}})
+
+	window.Register1(hook.KeyDown, []string{"8", "ctrl"}, // нижняя указательный
+		api.WindEvent{
+			"jetbrains-idea": func(event hook.Event) {
+				if api.CheckBtn(window) {
+					robotgo.KeyTap("f8")
+					//log.Println("f8")
+				}
+			}})
+
+	//center left right
+	window.RegisterMouse1(hook.MouseUp, hook.MouseMap["center"], // правый клик
+		api.WindEvent{
+			"jetbrains-idea": func(event hook.Event) {
+				if api.CheckBtn(window) {
+					robotgo.KeyTap("f7")
+					//log.Println("f7")
+				}
+			}})
+
+	// center left right
+	//window.RegisterMouse1(hook.MouseUp, hook.MouseMap["right"], // указательный
+	//	api.WindEvent{
+	//		"jetbrains-idea": func(event hook.Event) {
+	//			if api.CheckBtn() {
+	//				robotgo.KeyTap("f7")
+	//			} else {
+	//				robotgo.KeyTap("ctrl", "f4")
+	//			}
+	//		},
+	//		"microsoft-edge": func(event hook.Event) {
+	//			robotgo.KeyTap("w", "ctrl")
+	//			//fmt.Println(event, "w")
+	//		}})
 
 	//window.Register(hook.KeyDown, []string{"q"},
 	//	func(event hook.Event) {
@@ -87,13 +125,14 @@ func main() {
 	//		}
 	//	})
 
-	window.Register(hook.KeyDown, []string{"ctrl", "8"}, // нижняя указательный
-		func(event hook.Event) {
-			if api.CheckBtn() {
-				robotgo.KeyTap("f8")
-				fmt.Println(event, "f8")
-			}
-		})
+	//window.Register(hook.KeyDown, []string{"ctrl", "8"}, // нижняя указательный
+	//	func(event hook.Event) {
+	//		if api.CheckBtn(window) {
+	//			robotgo.KeyTap("f8")
+	//			//log.Println("f8")
+	//		}
+	//	})
+
 	//window.Register(hook.KeyDown, []string{"l", "ctrl", "alt"}, // нижняя указательный
 	//	func(event hook.Event) {
 	//		if api.CheckBtn() {

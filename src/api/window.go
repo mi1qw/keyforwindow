@@ -12,6 +12,7 @@ import (
 	"github.com/robotn/xgbutil/xprop"
 	"github.com/robotn/xgbutil/xwindow"
 	"image/color"
+	"log"
 	"strings"
 )
 
@@ -49,7 +50,7 @@ func IsWinClass(name []byte) bool {
 	return bytes.HasPrefix(class, name)
 }
 
-func (b *Builder) findFuncByWind1() func(event hook.Event) {
+func (b *Builder) findFuncByWind1(keys string) func(event hook.Event) {
 	win := GetWin()
 	nameProp, err := xprop.GetProperty(X, win.Id, "WM_CLASS")
 	if err != nil {
@@ -59,7 +60,20 @@ func (b *Builder) findFuncByWind1() func(event hook.Event) {
 	class := nameProp.Value
 	class = class[:len(class)/2-1]
 	//fmt.Printf("Window process name: %s\n", class)
-	return b.make[string(class)]
+
+	// Проверка на класс окна "jetbrains-idea", выкл.чить дебаг
+	// если прешли в другое окно, то есть включить ПКМ
+	if !bytes.Equal(class, b.WindowClass) {
+		b.SetDebug(false)
+	}
+
+	strClass := string(class)
+
+	f := b.make[strClass+keys]
+	if f == nil {
+		f = b.make["any"]
+	}
+	return f
 }
 
 type RGBA struct {
@@ -85,7 +99,7 @@ func (r *RGBA) stringHEX() string {
 	return fmt.Sprintf("%x%x%x", r.R, r.B, r.G)
 }
 
-func CheckBtn() bool {
+func CheckBtn(builder *Builder) bool {
 
 	//for {
 	//	win1 := GetWin()
@@ -97,10 +111,12 @@ func CheckBtn() bool {
 	win := GetWin()
 	x, y, w, _ := Geometry(win)
 	//FindColor(x+w-280, y+57, 100, 100, RedBtnColor, 3, win)
-	b, n := checkColor(x+w-280, y+57, 270, 100, RedColor, 3)
+	b, n := checkColor(x+w-280, y+57, 270, 20, RedColor, 3)
 	if n > 1 { // если колличество попыток больше чем ...
-		println(b, n, "checkColor")
+		log.Println(b, n, "checkColor")
 	}
+
+	builder.SetDebug(b)
 	return b
 }
 
