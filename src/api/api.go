@@ -6,7 +6,10 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 )
+
+var PAUSE = 250 * time.Millisecond
 
 // m := Make(map[string]func(event hook.Event))
 type Builder struct {
@@ -15,19 +18,50 @@ type Builder struct {
 	bind        []string
 	key         []string
 	make        WindEvent
+	last        LastEvent
 }
 
 type WindEvent map[string]func(event hook.Event)
+
+type LastEvent struct {
+	key  string
+	time time.Time
+}
+
+func LastEventOf(key string) LastEvent {
+	return LastEvent{key: key, time: time.Now()}
+}
+
+func (l LastEvent) Equals(other LastEvent) bool {
+	return l.key == other.key
+}
 
 //type WindEvent struct {
 //	WindEvent
 //}
 
 func NewBuilder() *Builder {
+
 	builder := Builder{}
 	builder.make = make(map[string]func(event hook.Event))
 	builder.debug = false
 	return &builder
+}
+
+func (b *Builder) DoubleClick(other LastEvent) bool {
+	if !other.Equals(b.last) {
+		return false
+	}
+	if other.time.Sub(b.last.time) < PAUSE {
+		return true
+	}
+	return false
+	//return other.Equals(b.last) &&
+	//	other.time.Sub(b.last.time) < 500*time.Millisecond
+}
+
+func (b *Builder) SetLast(last LastEvent) {
+	b.last = last
 }
 
 func (b *Builder) SetKey(consumer func()) *Builder {
@@ -62,7 +96,9 @@ func (b *Builder) Register1(when uint8, cmds []string, w WindEvent) *Builder {
 	b.addAll(w, keys)
 	cb := func(event hook.Event) {
 		wind1 := b.findFuncByWind1(keys)
-		if wind1 != nil {
+		thisEvent := LastEventOf(keys)
+		if wind1 != nil && !b.DoubleClick(thisEvent) {
+			b.SetLast(thisEvent)
 			wind1(event)
 		}
 	}
@@ -89,7 +125,9 @@ func (b *Builder) RegisterMouse1(when uint8, comand uint16,
 	cb := func(event hook.Event) {
 		if event.Button == comand {
 			wind1 := b.findFuncByWind1(keys)
-			if wind1 != nil {
+			thisEvent := LastEventOf(keys)
+			if wind1 != nil && !b.DoubleClick(thisEvent) {
+				b.SetLast(thisEvent)
 				wind1(event)
 			}
 		}

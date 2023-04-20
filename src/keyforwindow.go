@@ -63,6 +63,8 @@ func main() {
 				}
 			},
 			"microsoft-edge": func(event hook.Event) {
+				// принудительно поднимаем, иначе будут повторные нажатия
+				robotgo.KeyTap("f1", "up")
 				robotgo.KeyTap("w", "ctrl")
 				//log.Println("microsoft-edge", "right")
 			}})
@@ -74,6 +76,14 @@ func main() {
 					robotgo.KeyTap("f8")
 					//log.Println("f8")
 				}
+			}})
+
+	window.Register1(hook.KeyDown, []string{"v", "ctrl"},
+		api.WindEvent{
+			"qterminal": func(event hook.Event) {
+				// принудительно поднимаем, иначе будут повторные нажатия
+				robotgo.KeyTap("v", "up")
+				robotgo.KeyTap("v", "ctrl", "shift")
 			}})
 
 	//center left right
