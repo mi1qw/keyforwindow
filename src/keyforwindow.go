@@ -2,8 +2,8 @@ package main
 
 import "C"
 import (
-	"fmt"
 	"github.com/go-vgo/robotgo"
+	"github.com/go-vgo/robotgo/clipboard"
 	hook "github.com/robotn/gohook"
 	"github.com/robotn/xgbutil"
 	"image/color"
@@ -51,6 +51,7 @@ func main() {
 	window := api.NewBuilder().SetWindow("jetbrains-idea")
 
 	// center left right
+	//WM_CLASS(STRING) = "microsoft-edge", "Microsoft-edge"
 	window.Register1(hook.KeyDown, []string{"f1", "ctrl"}, // указательный
 		api.WindEvent{
 			"jetbrains-idea": func(event hook.Event) {
@@ -82,8 +83,10 @@ func main() {
 		api.WindEvent{
 			"qterminal": func(event hook.Event) {
 				// принудительно поднимаем, иначе будут повторные нажатия
-				robotgo.KeyTap("v", "up")
-				robotgo.KeyTap("v", "ctrl", "shift")
+				robotgo.KeyTap("v", "up", "ctrl")
+				text, _ := clipboard.ReadAll()
+				robotgo.TypeStr(text)
+				//robotgo.KeyTap("v", "ctrl", "shift") // вставляются ненужные символы
 			}})
 
 	//center left right
@@ -96,81 +99,10 @@ func main() {
 				}
 			}})
 
-	// center left right
-	//window.RegisterMouse1(hook.MouseUp, hook.MouseMap["right"], // указательный
-	//	api.WindEvent{
-	//		"jetbrains-idea": func(event hook.Event) {
-	//			if api.CheckBtn() {
-	//				robotgo.KeyTap("f7")
-	//			} else {
-	//				robotgo.KeyTap("ctrl", "f4")
-	//			}
-	//		},
-	//		"microsoft-edge": func(event hook.Event) {
-	//			robotgo.KeyTap("w", "ctrl")
-	//			//fmt.Println(event, "w")
-	//		}})
-
-	//window.Register(hook.KeyDown, []string{"q"},
-	//	func(event hook.Event) {
-	//		fmt.Println("q!!!!!!!!!!!")
-	//	})
-
 	// window.Register(hook.KeyDown, []string{"esc"},
 	// 	func(event hook.Event) {
 	// 		hook.End()
 	// 	})
-
-	//window.RegisterMouse(hook.MouseUp, hook.MouseMap["left"],
-	//	func(event hook.Event) {
-	//		fmt.Println(event)
-	//	})
-
-	// center left right
-	//window.RegisterMouse(hook.MouseUp, hook.MouseMap["right"], // указательный
-	//	func(event hook.Event) {
-	//		if api.CheckBtn() {
-	//			robotgo.KeyTap("f8")
-	//			fmt.Println(event)
-	//		}
-	//	})
-
-	//window.Register(hook.KeyDown, []string{"ctrl", "8"}, // нижняя указательный
-	//	func(event hook.Event) {
-	//		if api.CheckBtn(window) {
-	//			robotgo.KeyTap("f8")
-	//			//log.Println("f8")
-	//		}
-	//	})
-
-	//window.Register(hook.KeyDown, []string{"l", "ctrl", "alt"}, // нижняя указательный
-	//	func(event hook.Event) {
-	//		if api.CheckBtn() {
-	//			//robotgo.Sleep(500)
-	//			robotgo.KeyTap(robotgo.F9)  // не работает
-	//			//robotgo.KeyTap(robotgo.Shift, robotgo.F8)
-	//			//robotgo.KeyTap("f8", "shift")
-	//
-	//			//robotgo.KeyToggle("shift", "down")
-	//			//robotgo.KeyToggle("f8", "down")
-	//			//robotgo.Sleep(100)
-	//			//robotgo.KeyToggle("f8", "up")
-	//			//robotgo.KeyToggle("shift", "up")
-	//
-	//			fmt.Println(event)
-	//		}
-	//		//else {
-	//		//	robotgo.KeyTap("l", "ctrl", "shift")
-	//		//}
-	//	})
-
-	//WM_CLASS(STRING) = "microsoft-edge", "Microsoft-edge"
-	//browser := api.NewBuilder().SetWindow("microsoft-edge")
-	//browser.RegisterMouse(hook.MouseUp, hook.MouseMap["right"], // указательный
-	//	func(event hook.Event) {
-	//		robotgo.KeyTap("w", "ctrl")
-	//		//fmt.Println(event)
-	//	})
 
 	<-hook.Process(s)
 
@@ -238,31 +170,6 @@ func main() {
 	//	println(n, robotgo.GetPid())
 	//	//println(robotgo.GetHandle())
 	//}
-}
-
-func add() {
-	fmt.Println("--- Please press ctrl + shift + q to stop hook ---")
-	hook.Register(hook.KeyDown, []string{"q", "ctrl", "shift"}, func(e hook.Event) {
-		fmt.Println("ctrl-shift-q")
-		hook.End()
-	})
-
-	fmt.Println("--- Please press w---")
-	hook.Register(hook.KeyDown, []string{"w"}, func(e hook.Event) {
-		fmt.Println("w")
-	})
-
-	s := hook.Start()
-	<-hook.Process(s)
-}
-
-func low() {
-	evChan := hook.Start()
-	defer hook.End()
-
-	for ev := range evChan {
-		fmt.Println("hook: ", ev)
-	}
 }
 
 //func VolumeMouse() {
