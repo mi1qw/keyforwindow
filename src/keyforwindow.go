@@ -33,17 +33,11 @@ func init() {
 }
 func main() {
 
-	//api.CheckBtn()
-
-	//x, y, w, h := robotgo.GetBounds(robotgo.GetPID())
-	//println(x, y, w, h)
 	////start := time.Now().Nanosecond()
 	//println(checkColor(x+w-280, y+36, 10, 10, redButton, 3))
 
 	//var duration = time.Now().Nanosecond() - start
 	//println("duration ", duration)
-
-	//findColor(x, y, w, h, redButton, 3)  // поиск красного цвета в прямоугольнике
 
 	s := hook.Start()
 	defer hook.End()
@@ -64,8 +58,6 @@ func main() {
 				}
 			},
 			"microsoft-edge": func(event hook.Event) {
-				// принудительно поднимаем, иначе будут повторные нажатия
-				robotgo.KeyTap("f1", "up")
 				robotgo.KeyTap("w", "ctrl")
 				//log.Println("microsoft-edge", "right")
 			}})
@@ -82,14 +74,11 @@ func main() {
 	window.Register1(hook.KeyDown, []string{"v", "ctrl"},
 		api.WindEvent{
 			"qterminal": func(event hook.Event) {
-				// принудительно поднимаем, иначе будут повторные нажатия
-				robotgo.KeyTap("v", "up", "ctrl")
 				text, _ := clipboard.ReadAll()
 				robotgo.TypeStr(text)
 				//robotgo.KeyTap("v", "ctrl", "shift") // вставляются ненужные символы
 			}})
 
-	//center left right
 	window.RegisterMouse1(hook.MouseUp, hook.MouseMap["center"], // правый клик
 		api.WindEvent{
 			"jetbrains-idea": func(event hook.Event) {

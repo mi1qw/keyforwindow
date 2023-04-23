@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/go-vgo/robotgo"
 	hook "github.com/robotn/gohook"
 	"log"
 	"os/exec"
@@ -90,25 +91,45 @@ func (b *Builder) Register(when uint8, cmds []string, f func(event hook.Event)) 
 	return b
 }
 
+// принудительно поднимаем, иначе будут повторные нажатия
+func keyUpFunc(cmds []string) func() {
+	switch len(cmds) {
+	case 1:
+		return func() { robotgo.KeyTap(cmds[0], "up") }
+	case 2:
+		return func() { robotgo.KeyTap(cmds[0], "up", cmds[1]) }
+	case 3:
+		return func() { robotgo.KeyTap(cmds[0], "up", cmds[1], cmds[2]) }
+	case 4:
+		return func() { robotgo.KeyTap(cmds[0], "up", cmds[1], cmds[2], cmds[3]) }
+	default:
+		return nil
+	}
+}
+
 // Register обёртка для func(event hook.Event)
 func (b *Builder) Register1(when uint8, cmds []string, w WindEvent) *Builder {
 	keys := " " + strings.Join(cmds, " ")
 	b.addAll(w, keys)
+	keyUp := keyUpFunc(cmds)
 	cb := func(event hook.Event) {
 		wind1 := b.findFuncByWind1(keys)
 		thisEvent := LastEventOf(keys)
 		if wind1 != nil && !b.DoubleClick(thisEvent) {
+			if keyUp != nil {
+				keyUp()
+			}
 			b.SetLast(thisEvent)
 			wind1(event)
 		}
 	}
+
 	hook.Register(when, cmds, cb)
 	return b
 }
 
 // RegisterMouse обёртка для func(event hook.Event)
-func (b *Builder) RegisterMouse(when uint8, comand uint16,
-	f func(event hook.Event)) *Builder {
+func (b *Builder) RegisterMouse(when uint8, comand uint16, f func(event hook.Event)) *Builder {
 	cb := func(event hook.Event) {
 		if IsWinClass(b.WindowClass) && event.Button == comand {
 			f(event)
@@ -118,8 +139,7 @@ func (b *Builder) RegisterMouse(when uint8, comand uint16,
 	return b
 }
 
-func (b *Builder) RegisterMouse1(when uint8, comand uint16,
-	w WindEvent) *Builder {
+func (b *Builder) RegisterMouse1(when uint8, comand uint16, w WindEvent) *Builder {
 	keys := " " + strconv.Itoa(int(comand))
 	b.addAll(w, keys)
 	cb := func(event hook.Event) {

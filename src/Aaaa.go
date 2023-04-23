@@ -1,6 +1,14 @@
 package main
 
+import "fmt"
+
 func main() {
+
+	strings := []string{"a", "b", "c"}
+	fmt.Println(strings)
+	fmt.Println(strings[0])
+	fmt.Println(strings[1:])
+
 	bbb()
 	println("1")
 	println("1")
