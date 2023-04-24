@@ -14,23 +14,28 @@ var PAUSE = 250 * time.Millisecond
 
 // m := Make(map[string]func(event hook.Event))
 type Builder struct {
+	ch          *chan hook.Event
 	WindowClass []byte
 	debug       bool
 	bind        []string
 	key         []string
 	make        WindEvent
-	last        LastEvent
+	Last        LastEvent
+	left        bool
 }
 
 type WindEvent map[string]func(event hook.Event)
 
 type LastEvent struct {
-	key  string
-	time time.Time
+	key   string
+	time  time.Time
+	event hook.Event
 }
 
-func LastEventOf(key string) LastEvent {
-	return LastEvent{key: key, time: time.Now()}
+func LastEventOf(key string, event hook.Event) LastEvent {
+	return LastEvent{key: key,
+		time:  time.Now(),
+		event: event}
 }
 
 func (l LastEvent) Equals(other LastEvent) bool {
@@ -41,28 +46,28 @@ func (l LastEvent) Equals(other LastEvent) bool {
 //	WindEvent
 //}
 
-func NewBuilder() *Builder {
-
+func NewBuilder(ch *chan hook.Event) *Builder {
 	builder := Builder{}
+	builder.ch = ch
 	builder.make = make(map[string]func(event hook.Event))
 	builder.debug = false
 	return &builder
 }
 
 func (b *Builder) DoubleClick(other LastEvent) bool {
-	if !other.Equals(b.last) {
+	if !other.Equals(b.Last) {
 		return false
 	}
-	if other.time.Sub(b.last.time) < PAUSE {
+	if other.time.Sub(b.Last.time) < PAUSE {
 		return true
 	}
 	return false
-	//return other.Equals(b.last) &&
-	//	other.time.Sub(b.last.time) < 500*time.Millisecond
+	//return other.Equals(b.Last) &&
+	//	other.time.Sub(b.Last.time) < 500*time.Millisecond
 }
 
 func (b *Builder) SetLast(last LastEvent) {
-	b.last = last
+	b.Last = last
 }
 
 func (b *Builder) SetKey(consumer func()) *Builder {
@@ -114,7 +119,7 @@ func (b *Builder) Register1(when uint8, cmds []string, w WindEvent) *Builder {
 	keyUp := keyUpFunc(cmds)
 	cb := func(event hook.Event) {
 		wind1 := b.findFuncByWind1(keys)
-		thisEvent := LastEventOf(keys)
+		thisEvent := LastEventOf(keys, event)
 		if wind1 != nil && !b.DoubleClick(thisEvent) {
 			if keyUp != nil {
 				keyUp()
@@ -145,8 +150,24 @@ func (b *Builder) RegisterMouse1(when uint8, comand uint16, w WindEvent) *Builde
 	cb := func(event hook.Event) {
 		if event.Button == comand {
 			wind1 := b.findFuncByWind1(keys)
-			thisEvent := LastEventOf(keys)
+			thisEvent := LastEventOf(keys, event)
 			if wind1 != nil && !b.DoubleClick(thisEvent) {
+				wind1(event)
+				b.SetLast(thisEvent)
+			}
+		}
+	}
+	hook.Register(when, []string{}, cb)
+	return b
+}
+func (b *Builder) RegisterMouseCtrl(when uint8, comand uint16, w WindEvent) *Builder {
+	keys := " " + strconv.Itoa(int(comand))
+	b.addAll(w, keys)
+	cb := func(event hook.Event) {
+		if event.Button == comand {
+			wind1 := b.findFuncByWind1(keys)
+			thisEvent := LastEventOf(keys, event)
+			if wind1 != nil && b.HoldClick(hook.MouseMap["left"]) && !b.DoubleClick(thisEvent) {
 				b.SetLast(thisEvent)
 				wind1(event)
 			}
@@ -154,6 +175,34 @@ func (b *Builder) RegisterMouse1(when uint8, comand uint16, w WindEvent) *Builde
 	}
 	hook.Register(when, []string{}, cb)
 	return b
+}
+func (b *Builder) HoldClick(comand uint16) bool {
+	if comand == b.Last.event.Button &&
+		(hook.MouseDown == b.Last.event.Kind ||
+			hook.MouseHold == b.Last.event.Kind) {
+		return true
+	}
+	return false
+}
+
+func (b *Builder) State() *chan hook.Event {
+	events := make(chan hook.Event)
+	go func() {
+		for {
+			ev := <-*b.ch
+			if ev.Button == hook.MouseMap["left"] {
+				//log.Println(ev)
+				if ev.Kind == hook.MouseDown || ev.Kind == hook.MouseHold {
+					b.left = true
+				} else {
+					b.left = false
+				}
+				b.Last.event = ev
+			}
+			events <- ev
+		}
+	}()
+	return &events
 }
 
 func (b *Builder) addAll(w WindEvent, key string) {

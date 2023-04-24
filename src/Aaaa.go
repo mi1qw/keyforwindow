@@ -1,8 +1,11 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
+	//hook.AddEvent("mleft")
 
 	strings := []string{"a", "b", "c"}
 	fmt.Println(strings)

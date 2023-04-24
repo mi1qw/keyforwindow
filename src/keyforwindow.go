@@ -42,8 +42,8 @@ func main() {
 	s := hook.Start()
 	defer hook.End()
 
-	window := api.NewBuilder().SetWindow("jetbrains-idea")
-
+	window := api.NewBuilder(&s).SetWindow("jetbrains-idea")
+	events := window.State()
 	// center left right
 	//WM_CLASS(STRING) = "microsoft-edge", "Microsoft-edge"
 	window.Register1(hook.KeyDown, []string{"f1", "ctrl"}, // указательный
@@ -83,17 +83,46 @@ func main() {
 		api.WindEvent{
 			"jetbrains-idea": func(event hook.Event) {
 				if api.CheckBtn(window) {
-					robotgo.KeyTap("f7")
-					//log.Println("f7")
+					if window.HoldClick(hook.MouseMap["left"]) {
+						robotgo.KeyTap("f8", "shift")
+						//log.Println("\"shift\" f8")
+					} else {
+						robotgo.KeyTap("f7")
+						//log.Println("f7")
+					}
 				}
 			}})
+	//	window.RegisterMouseCtrl(hook.MouseUp, hook.MouseMap["center"], // правый клик
+	//	api.WindEvent{
+	//	"jetbrains-idea": func (event hook.Event){
+	//	if api.CheckBtn(window){
+	//	robotgo.KeyTap("f8", "shift")
+	//	log.Println("\"shift\" f8")
+	//}
+	//}})
+
+	//window.RegisterMouse1(hook.MouseUp, hook.MouseMap["left"], // клик
+	//	api.WindEvent{
+	//		"jetbrains-idea": func(event hook.Event) {
+	//			if api.CheckBtn(window) {
+	//				log.Println("MouseUp[\"left\"]")
+	//			}
+	//		}})
+	//window.RegisterMouse1(hook.MouseDown, hook.MouseMap["left"], // клик
+	//	api.WindEvent{
+	//		"jetbrains-idea": func(event hook.Event) {
+	//			if api.CheckBtn(window) {
+	//				log.Println("MouseDown[\"left\"]")
+	//			}
+	//		}})
 
 	// window.Register(hook.KeyDown, []string{"esc"},
 	// 	func(event hook.Event) {
 	// 		hook.End()
 	// 	})
 
-	<-hook.Process(s)
+	<-hook.Process(*events)
+	//<-hook.Process(s)
 
 	//for n := 1; ; n++ {
 	//
