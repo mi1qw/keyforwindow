@@ -58,8 +58,11 @@ func main() {
 				}
 			},
 			"microsoft-edge": func(event hook.Event) {
-				robotgo.KeyTap("w", "ctrl")
-				//log.Println("microsoft-edge", "right")
+				//robotgo.KeyTap("w", "ctrl")
+				robotgo.KeyTap("w", "down", "ctrl")
+				//robotgo.MilliSleep(10)
+				robotgo.KeyTap("w", "up", "ctrl")
+				//log.Println("microsoft-edge", "w + ctrl")
 			}})
 
 	window.Register1(hook.KeyDown, []string{"8", "ctrl"}, // нижняя указательный
