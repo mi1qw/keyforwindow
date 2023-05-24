@@ -58,19 +58,33 @@ func main() {
 				}
 			},
 			"microsoft-edge": func(event hook.Event) {
-				//robotgo.KeyTap("w", "ctrl")
-				robotgo.KeyTap("w", "down", "ctrl")
-				//robotgo.MilliSleep(10)
-				robotgo.KeyTap("w", "up", "ctrl")
+				robotgo.KeyTap("w", "ctrl")
 				//log.Println("microsoft-edge", "w + ctrl")
 			}})
 
-	window.Register1(hook.KeyDown, []string{"8", "ctrl"}, // нижняя указательный
+	window.Register1(hook.KeyDown, []string{"8", "ctrl"}, // указательный нижняя кнопка
 		api.WindEvent{
 			"jetbrains-idea": func(event hook.Event) {
 				if api.CheckBtn(window) {
-					robotgo.KeyTap("f8")
-					//log.Println("f8")
+					robotgo.KeyTap("f7")
+					//log.Println("f7")
+				} else {
+					robotgo.KeyTap("b", "ctrl")
+					//log.Println("ctrl+Click")
+				}
+			}})
+
+	window.Register1(hook.KeyDown, []string{"9", "ctrl"}, // большой палец мышь клик
+		api.WindEvent{
+			"jetbrains-idea": func(event hook.Event) {
+				if api.CheckBtn(window) {
+					robotgo.KeyTap("f10", "alt")
+					robotgo.MilliSleep(100)
+					robotgo.KeyTap("l", "ctrl", "alt")
+					robotgo.MilliSleep(100)
+					robotgo.KeyTap("esc")
+				} else {
+					robotgo.KeyTap("l", "ctrl", "alt")
 				}
 			}})
 
@@ -90,11 +104,12 @@ func main() {
 						robotgo.KeyTap("f8", "shift")
 						//log.Println("\"shift\" f8")
 					} else {
-						robotgo.KeyTap("f7")
+						robotgo.KeyTap("f8")
 						//log.Println("f7")
 					}
 				}
 			}})
+
 	//	window.RegisterMouseCtrl(hook.MouseUp, hook.MouseMap["center"], // правый клик
 	//	api.WindEvent{
 	//	"jetbrains-idea": func (event hook.Event){
