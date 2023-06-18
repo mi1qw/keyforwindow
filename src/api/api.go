@@ -12,6 +12,15 @@ import (
 
 var PAUSE = 250 * time.Millisecond
 
+/*
+WindowClass 	- "jetbrains-idea" для IDEA
+left	bool    - флаг нажатия состояния левой кнопки мыши
+Last    LastEvent - последнее событие левой кнопки мыши
+make    WindEvent - MAP с WindEvent, key = имя окна+клавиши
+					b.make[s+key] = f функция
+debug   bool    - флаг отладки
+*/
+
 // m := Make(map[string]func(event hook.Event))
 type Builder struct {
 	ch          *chan hook.Event
@@ -23,6 +32,14 @@ type Builder struct {
 	Last        LastEvent
 	left        bool
 }
+
+/*
+Map,
+Key ключом - является join всех задйствованных кнопок
+например "f1 ctrl".
+Value - pначениеv является функция, выполняемая при
+		нажатии на соотвествующие клавиши
+*/
 
 type WindEvent map[string]func(event hook.Event)
 
@@ -42,10 +59,6 @@ func (l LastEvent) Equals(other LastEvent) bool {
 	return l.key == other.key
 }
 
-//type WindEvent struct {
-//	WindEvent
-//}
-
 func NewBuilder(ch *chan hook.Event) *Builder {
 	builder := Builder{}
 	builder.ch = ch
@@ -54,6 +67,7 @@ func NewBuilder(ch *chan hook.Event) *Builder {
 	return &builder
 }
 
+// DoubleClick todo почему я этот вариант, вроде тот правильный
 func (b *Builder) DoubleClick(other LastEvent) bool {
 	if !other.Equals(b.Last) {
 		return false
@@ -96,7 +110,7 @@ func (b *Builder) Register(when uint8, cmds []string, f func(event hook.Event)) 
 	return b
 }
 
-// принудительно поднимаем, иначе будут повторные нажатия
+// принудительно поднимаем кнопки, иначе будут повторные нажатия
 func keyUpFunc(cmds []string) func() {
 	switch len(cmds) {
 	case 1:
@@ -113,19 +127,19 @@ func keyUpFunc(cmds []string) func() {
 }
 
 // Register обёртка для func(event hook.Event)
-func (b *Builder) Register1(when uint8, cmds []string, w WindEvent) *Builder {
+func (b *Builder) Register1(when uint8, cmds []string, wevnt WindEvent) *Builder {
 	keys := " " + strings.Join(cmds, " ")
-	b.addAll(w, keys)
+	b.addAll(wevnt, keys)
 	keyUp := keyUpFunc(cmds)
 	cb := func(event hook.Event) {
-		wind1 := b.findFuncByWind1(keys)
+		funcWind := b.findFuncByWind1(keys)
 		thisEvent := LastEventOf(keys, event)
-		if wind1 != nil && !b.DoubleClick(thisEvent) {
+		if funcWind != nil && !b.DoubleClick(thisEvent) {
 			if keyUp != nil {
 				keyUp()
 			}
 			b.SetLast(thisEvent)
-			wind1(event)
+			funcWind(event)
 		}
 	}
 
@@ -149,10 +163,10 @@ func (b *Builder) RegisterMouse1(when uint8, comand uint16, w WindEvent) *Builde
 	b.addAll(w, keys)
 	cb := func(event hook.Event) {
 		if event.Button == comand {
-			wind1 := b.findFuncByWind1(keys)
+			funcWind := b.findFuncByWind1(keys)
 			thisEvent := LastEventOf(keys, event)
-			if wind1 != nil && !b.DoubleClick(thisEvent) {
-				wind1(event)
+			if funcWind != nil && !b.DoubleClick(thisEvent) {
+				funcWind(event)
 				b.SetLast(thisEvent)
 			}
 		}
@@ -165,11 +179,11 @@ func (b *Builder) RegisterMouseCtrl(when uint8, comand uint16, w WindEvent) *Bui
 	b.addAll(w, keys)
 	cb := func(event hook.Event) {
 		if event.Button == comand {
-			wind1 := b.findFuncByWind1(keys)
+			funcWind := b.findFuncByWind1(keys)
 			thisEvent := LastEventOf(keys, event)
-			if wind1 != nil && b.HoldClick(hook.MouseMap["left"]) && !b.DoubleClick(thisEvent) {
+			if funcWind != nil && b.HoldClick(hook.MouseMap["left"]) && !b.DoubleClick(thisEvent) {
 				b.SetLast(thisEvent)
-				wind1(event)
+				funcWind(event)
 			}
 		}
 	}
@@ -184,6 +198,14 @@ func (b *Builder) HoldClick(comand uint16) bool {
 	}
 	return false
 }
+
+/*
+Создаю отдельный поток, в котором
+отлавливаю нажатие левой кнопки мыши и запоминая  её
+последнее состояние.
+Этот поток пропускавет через себя все события!
+*/
+// TODO надо ли завершать поток,как и когда это сделать
 
 func (b *Builder) State() *chan hook.Event {
 	events := make(chan hook.Event)
