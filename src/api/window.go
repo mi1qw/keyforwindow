@@ -50,7 +50,7 @@ func IsWinClass(name []byte) bool {
 	return bytes.HasPrefix(class, name)
 }
 
-func (b *Builder) findFuncByWind1(keys string) func(event hook.Event) {
+func (b *Builder) findFuncByWind(keys string) func(event hook.Event) {
 	win := GetWin()
 	nameProp, err := xprop.GetProperty(X, win.Id, "WM_CLASS")
 	if err != nil {
