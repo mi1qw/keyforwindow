@@ -59,15 +59,15 @@ func (b *Builder) findFuncByWind(keys string) func(event hook.Event) {
 	}
 	class := nameProp.Value
 	class = class[:len(class)/2-1]
-	//fmt.Printf("Window process name: %s\n", class)
 
 	// Проверка на класс окна "jetbrains-idea", выключить дебаг
 	// если прешли в другое окно, то есть включить ПКМ
 	if !bytes.Equal(class, b.WindowClass) {
 		b.SetDebug(false)
 	}
-
 	strClass := string(class)
+	strClass = strings.TrimRight(strClass, "\u0000")
+	//fmt.Printf("Window process name: %s\n", strClass)
 
 	// получаем функцию для нужного окна
 	f := b.make[strClass+keys]

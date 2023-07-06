@@ -49,7 +49,7 @@ type LastEvent struct {
 	event hook.Event
 }
 
-func LastEventOf(key string, event hook.Event) LastEvent {
+func EventOf(key string, event hook.Event) LastEvent {
 	return LastEvent{key: key,
 		time:  time.Now(),
 		event: event}
@@ -133,7 +133,7 @@ func (b *Builder) Register1(when uint8, cmds []string, wevnt WindEvent) *Builder
 	keyUp := keyUpFunc(cmds)
 	cb := func(event hook.Event) {
 		funcWind := b.findFuncByWind(keys)
-		thisEvent := LastEventOf(keys, event)
+		thisEvent := EventOf(keys, event)
 		if funcWind != nil && !b.DoubleClick(thisEvent) {
 			if keyUp != nil {
 				keyUp()
@@ -164,7 +164,7 @@ func (b *Builder) RegisterMouse1(when uint8, comand uint16, w WindEvent) *Builde
 	cb := func(event hook.Event) {
 		if event.Button == comand {
 			funcWind := b.findFuncByWind(keys)
-			thisEvent := LastEventOf(keys, event)
+			thisEvent := EventOf(keys, event)
 			if funcWind != nil && !b.DoubleClick(thisEvent) {
 				funcWind(event)
 				b.SetLast(thisEvent)
@@ -180,7 +180,7 @@ func (b *Builder) RegisterMouseCtrl(when uint8, comand uint16, w WindEvent) *Bui
 	cb := func(event hook.Event) {
 		if event.Button == comand {
 			funcWind := b.findFuncByWind(keys)
-			thisEvent := LastEventOf(keys, event)
+			thisEvent := EventOf(keys, event)
 			if funcWind != nil && b.HoldClick(hook.MouseMap["left"]) && !b.DoubleClick(thisEvent) {
 				b.SetLast(thisEvent)
 				funcWind(event)

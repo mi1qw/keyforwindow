@@ -58,9 +58,19 @@ func main() {
 				}
 			},
 			"microsoft-edge": func(event hook.Event) {
-				robotgo.KeyTap("w", "ctrl")
+				//robotgo.KeyToggle("ctrl", "down")
+				//robotgo.KeyTap("w")
+				//robotgo.KeyToggle("ctrl", "up")
+				//robotgo.KeyTap("w", "ctrl", "down")
+				//robotgo.KeyTap("w", "ctrl", "up")
+				robotgo.KeyTap("f4", "ctrl")
+				//robotgo.KeyTap("w", "ctrl")
 				//log.Println("microsoft-edge", "w + ctrl")
-			}})
+			},
+			"Navigator": func(event hook.Event) {
+				robotgo.KeyTap("f4", "ctrl")
+			},
+		})
 
 	window.Register1(hook.KeyDown, []string{"8", "ctrl"}, // указательный нижняя кнопка
 		api.WindEvent{
@@ -86,7 +96,11 @@ func main() {
 				} else {
 					robotgo.KeyTap("l", "ctrl", "alt")
 				}
-			}})
+			},
+			"Navigator": func(event hook.Event) {
+				robotgo.KeyTap(robotgo.Tab, "ctrl")
+			},
+		})
 
 	window.Register1(hook.KeyDown, []string{"v", "ctrl"},
 		api.WindEvent{
